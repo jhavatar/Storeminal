@@ -53,6 +53,8 @@ dependencies {
     // coproutines, flow
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1"
+
 
     // json
     implementation "com.squareup.moshi:moshi-adapters:1.13.0"
@@ -66,6 +68,9 @@ dependencies {
 
     // test
     testImplementation 'junit:junit:4.13.2'
+    testImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
+    testImplementation "org.mockito:mockito-inline:4.3.1"
+    testImplementation 'org.amshove.kluent:kluent:1.68'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 }

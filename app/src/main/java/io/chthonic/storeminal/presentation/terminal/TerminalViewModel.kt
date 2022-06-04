@@ -1,6 +1,7 @@
 package io.chthonic.storeminal.presentation.terminal
 
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,16 +32,18 @@ class TerminalViewModel @Inject constructor(
     private val _historyToDisplay = MutableStateFlow("")
     val historyToDisplay: StateFlow<String> = _historyToDisplay.asStateFlow()
 
-    private val _clearInput = MutableStateFlow(false)
+    @VisibleForTesting
+    val _clearInput = MutableStateFlow(false)
     val clearInput: StateFlow<Boolean> = _clearInput.asStateFlow()
 
-    private val _inputEnabled = MutableStateFlow(true)
-    val inputEnabled: StateFlow<Boolean> = _inputEnabled.asStateFlow()
+    @VisibleForTesting
+    val _inputSubmitEnabled = MutableStateFlow(true)
+    val inputSubmitEnabled: StateFlow<Boolean> = _inputSubmitEnabled.asStateFlow()
 
     fun onInputSubmitted(input: InputString) {
-        if (!inputEnabled.value) return
+        if (!inputSubmitEnabled.value) return
         _clearInput.value = true
-        _inputEnabled.value = false
+        _inputSubmitEnabled.value = false
         updateHistory(HistoryItem.InputHistory(input.text))
         executeCommand(input)
     }
@@ -52,11 +55,9 @@ class TerminalViewModel @Inject constructor(
     private fun executeCommand(input: InputString) {
         viewModelScope.launch {
             try {
-                val response = executeCommandUseCase.execute(input)
-                if (response != null) {
-                    updateHistory(HistoryItem.OutputHistory(response, isError = false))
+                executeCommandUseCase.execute(input)?.let {
+                    updateHistory(HistoryItem.OutputHistory(it, isError = false))
                 }
-                Log.v("d3V", "executeCommandUseCase success $response")
             } catch (e: UnknownCommandException) {
                 updateHistory(HistoryItem.OutputHistory(UNKNOWN_COMMAND))
             } catch (e: NoTransactionException) {
@@ -66,7 +67,7 @@ class TerminalViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e("D3V", "executeCommandUseCase failed", e)
             }
-            _inputEnabled.value = true
+            _inputSubmitEnabled.value = true
         }
     }
 
@@ -80,7 +81,7 @@ class TerminalViewModel @Inject constructor(
         historyItem.toString()
 }
 
-sealed class HistoryItem(val text: String) {
+private sealed class HistoryItem(val text: String) {
     class InputHistory(text: String) : HistoryItem(text) {
         override fun toString(): String = "> $text"
     }

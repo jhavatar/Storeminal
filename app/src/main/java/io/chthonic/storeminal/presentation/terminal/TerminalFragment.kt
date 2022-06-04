@@ -75,7 +75,7 @@ class TerminalFragment : Fragment() {
         }
 
         lifecycleScope.launchWhenStarted {
-            viewModel.inputEnabled.collect { enabled ->
+            viewModel.inputSubmitEnabled.collect { enabled ->
                 binding.submitButton.isEnabled = enabled
             }
         }

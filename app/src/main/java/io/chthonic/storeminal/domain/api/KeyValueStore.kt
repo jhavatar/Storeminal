@@ -10,4 +10,4 @@ interface KeyValueStore {
     suspend fun rollbackTransaction()
 }
 
-class NoTransactionException : Exception()
+class NoTransactionException : RuntimeException()

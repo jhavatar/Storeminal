@@ -6,11 +6,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.chthonic.storeminal.data.memory.MemoryStore
 import io.chthonic.storeminal.domain.api.KeyValueStore
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 class DataSingletonModule {
     @Provides
-    fun provideKeyValueStore(impl: MemoryStore): KeyValueStore =
-        impl
+    @Singleton
+    fun provideKeyValueStore(): KeyValueStore =
+        MemoryStore()
 }

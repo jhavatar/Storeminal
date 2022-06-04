@@ -3,21 +3,23 @@ package io.chthonic.storeminal.data.memory
 import io.chthonic.storeminal.domain.api.KeyValueStore
 import io.chthonic.storeminal.domain.api.NoTransactionException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class MemoryStore @Inject constructor() : KeyValueStore {
+/**
+ * Thread-safe in-memory implementation of [KeyValueStore]
+ * @param initialState The initial state of the store, default is null. Can be used for testing and to restore the store from persistence.
+ */
+internal class MemoryStore(initialState: ArrayDeque<ConcurrentHashMap<String, String>>? = null) :
+    KeyValueStore {
 
     private val transMutex = Mutex()
-    private val transStack = ArrayDeque<ConcurrentHashMap<String, String>>(1).apply {
-        this.addLast(ConcurrentHashMap<String, String>())
-    }
+    private val transStack =
+        initialState ?: ArrayDeque<ConcurrentHashMap<String, String>>(1).apply {
+            this.addLast(ConcurrentHashMap<String, String>())
+        }
 
     override suspend fun set(key: String, value: String) {
         getActiveTrans()[key] = value
