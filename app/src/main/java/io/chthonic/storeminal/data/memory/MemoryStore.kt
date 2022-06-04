@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Thread-safe in-memory implementation of [KeyValueStore]
+ * Thread-safe in-memory implementation of [KeyValueStore].
  * @param initialState The initial state of the store, default is null. Can be used for testing and to restore the store from persistence.
  */
 internal class MemoryStore(initialState: ArrayDeque<ConcurrentHashMap<String, String>>? = null) :

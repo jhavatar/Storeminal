@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Key-Value Store Terminal</string>
+    <string name="app_name">Key-Value Store</string>
     <string name="input_hint">enter command</string>
 </resources>

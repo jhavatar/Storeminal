@@ -41,6 +41,6 @@ interface KeyValueStore {
 }
 
 /**
- * Command requires an active transaction which does not exist.
+ * Command required an active transaction which did not exist.
  */
 class NoTransactionException : RuntimeException()

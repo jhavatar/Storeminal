@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../layout/custom_preview.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_baseline_keyboard_return_24.xml" value="0.1285" />
         <entry key="app/src/main/res/drawable/ic_enter_icon.xml" value="0.1385" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.2305" />
         <entry key="app/src/main/res/drawable/input_bg.xml" value="0.205" />

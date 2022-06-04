@@ -7,10 +7,10 @@
     tools:context="io.chthonic.storeminal.MainActivity">
 
     <View
-        android:id="@+id/input_bg"
+        android:id="@+id/input_bar"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/purple_500"
+        android:background="@color/terminal_bottom_bar"
         android:minHeight="56dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -46,12 +46,14 @@
         android:focusableInTouchMode="true"
         android:focusedByDefault="true"
         android:hint="@string/input_hint"
+        android:importantForAutofill="no"
+        android:inputType="textMultiLine"
         android:isScrollContainer="false"
         android:lines="1"
         android:maxLines="1"
         android:padding="@dimen/view_spacing"
-        android:inputType="textMultiLine"
-        android:importantForAutofill="no"
+        android:textColor="@color/white"
+        android:textColorHint="@color/grey"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/submit_button"
         app:layout_constraintStart_toStartOf="parent"
@@ -62,13 +64,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="top"
-        app:constraint_referenced_ids="input_view,submit_button,input_bg" />
+        app:constraint_referenced_ids="input_view,submit_button,input_bar" />
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/history_scroll_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/black"
+        android:background="@color/terminal_bg"
         android:scrollbars="vertical"
         app:layout_constraintBottom_toTopOf="@id/input_top_barrier"
         app:layout_constraintEnd_toEndOf="parent"
@@ -83,7 +85,10 @@
             android:paddingStart="@dimen/view_spacing"
             android:paddingTop="@dimen/content_padding"
             android:paddingEnd="@dimen/view_spacing"
-            android:paddingBottom="@dimen/content_padding" />
+            android:paddingBottom="@dimen/content_padding"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+            android:textColor="@color/white"
+            tools:text="> SET x 100" />
 
     </androidx.core.widget.NestedScrollView>
 

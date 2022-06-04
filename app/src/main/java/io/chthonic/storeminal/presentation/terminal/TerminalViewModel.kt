@@ -20,8 +20,9 @@ private const val UNKNOWN_COMMAND = "unknown command"
 private const val NO_TRANS = "no transaction"
 private const val KEY_NOT_SET = "key not set"
 
-private const val COLOR_ERROR = "#CC0000"
-private const val COLOR_NON_ERROR = "#4BB543"
+private const val COLOR_CHEVRON = "#FAFA91"
+private const val COLOR_ERROR = "#FFB0E5"
+private const val COLOR_NON_ERROR = "#9FFF99"
 
 @HiltViewModel
 class TerminalViewModel @Inject constructor(
@@ -83,7 +84,7 @@ class TerminalViewModel @Inject constructor(
 
 private sealed class HistoryItem(val text: String) {
     class InputHistory(text: String) : HistoryItem(text) {
-        override fun toString(): String = "> $text"
+        override fun toString(): String = "<font color='$COLOR_CHEVRON'>></font> $text"
     }
 
     class OutputHistory(text: String, val isError: Boolean = true) : HistoryItem(text) {

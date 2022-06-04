@@ -21,8 +21,9 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-private const val COLOR_ERROR = "#CC0000"
-private const val COLOR_NON_ERROR = "#4BB543"
+private const val COLOR_CHEVRON = "#FAFA91"
+private const val COLOR_ERROR = "#FFB0E5"
+private const val COLOR_NON_ERROR = "#9FFF99"
 
 class TerminalViewModelTests {
     val input = InputString.validateOrNull("get foo")!!
@@ -69,7 +70,7 @@ class TerminalViewModelTests {
         tested.onInputSubmitted(input)
 
         // then
-        tested.historyToDisplay.value.shouldBeEqualTo("> get foo")
+        tested.historyToDisplay.value.shouldBeEqualTo("<font color='$COLOR_CHEVRON'>></font> get foo")
     }
 
     @Test

@@ -16,7 +16,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="@string/app_name"
-            android:background="?colorPrimaryVariant"/>
+            android:background="?colorPrimaryVariant"
+            app:titleTextColor="?colorOnPrimary"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 

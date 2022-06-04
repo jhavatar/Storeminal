@@ -8,8 +8,8 @@ interface ExecuteCommandLineInputUseCase {
     /**
      * Execute a single command line input and return a possible result.
      * @throws UnknownCommandException if input's command is not recognized.
-     * @throws KeyNotSetException if command references a value at a key that has not been set.
-     * @throws NoTransactionException if command requires an active transaction which does not exist.
+     * @throws KeyNotSetException if command references requires a key which has not been set.
+     * @throws NoTransactionException if command required an active transaction which did not exist.
      */
     suspend fun execute(input: InputString): String?
 }
