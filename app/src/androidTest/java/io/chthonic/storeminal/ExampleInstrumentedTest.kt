@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("io.chthonic.rickmortychars", appContext.packageName)
+        assertEquals("io.chthonic.storeminal", appContext.packageName)
     }
 }
