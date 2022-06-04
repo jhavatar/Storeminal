@@ -1,4 +1,4 @@
-package io.chthonic.storeminal.domain
+package io.chthonic.storeminal.domain.usecase
 
 import io.chthonic.storeminal.domain.error.UnknownCommandException
 import io.chthonic.storeminal.domain.model.Command
@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
 private val WHITE_SPACE = Regex("""\s+""")
 private const val MAX_EXPECTED_TOKENS = 3
 
-class ParseCommandUseCase @Inject constructor() {
+internal class ParseCommandUseCase @Inject constructor() {
 
     fun execute(inputString: InputString): Command {
         val tokens = inputString.text.split(WHITE_SPACE)
@@ -25,26 +25,26 @@ class ParseCommandUseCase @Inject constructor() {
             throw UnknownCommandException()
         }
         val commandToken = tokens[0]
-        val paramToken1 = tokens.getOrNull(1)
-        val paramToken2 = tokens.getOrNull(2)
+        val param1Token = tokens.getOrNull(1)
+        val param2Token = tokens.getOrNull(2)
 
-        return if (paramToken1.isNullOrEmpty() && paramToken2.isNullOrEmpty()) {
+        return if (param1Token.isNullOrEmpty() && param2Token.isNullOrEmpty()) {
             when {
                 commandToken.isCommand(Begin::class) -> Begin
                 commandToken.isCommand(Commit::class) -> Commit
                 commandToken.isCommand(Rollback::class) -> Rollback
                 else -> throw UnknownCommandException()
             }
-        } else if (paramToken1.isNotNullOrEmpty() && paramToken2.isNullOrEmpty()) {
+        } else if (param1Token.isNotNullOrEmpty() && param2Token.isNullOrEmpty()) {
             when {
-                commandToken.isCommand(Get::class) -> Get(paramToken1)
-                commandToken.isCommand(Delete::class) -> Delete(paramToken1)
-                commandToken.isCommand(Count::class) -> Count(paramToken1)
+                commandToken.isCommand(Get::class) -> Get(param1Token)
+                commandToken.isCommand(Delete::class) -> Delete(param1Token)
+                commandToken.isCommand(Count::class) -> Count(param1Token)
                 else -> throw UnknownCommandException()
             }
-        } else if (paramToken1.isNotNullOrEmpty() && paramToken2.isNotNullOrEmpty()) {
+        } else if (param1Token.isNotNullOrEmpty() && param2Token.isNotNullOrEmpty()) {
             when {
-                commandToken.isCommand(Set::class) -> Set(paramToken1, paramToken2)
+                commandToken.isCommand(Set::class) -> Set(param1Token, param2Token)
                 else -> throw UnknownCommandException()
             }
         } else {

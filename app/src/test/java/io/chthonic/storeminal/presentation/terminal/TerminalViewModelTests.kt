@@ -1,10 +1,10 @@
 package io.chthonic.storeminal.presentation.terminal
 
-import io.chthonic.storeminal.domain.ExecuteCommandUseCase
 import io.chthonic.storeminal.domain.api.NoTransactionException
 import io.chthonic.storeminal.domain.error.KeyNotSetException
 import io.chthonic.storeminal.domain.error.UnknownCommandException
 import io.chthonic.storeminal.domain.model.InputString
+import io.chthonic.storeminal.domain.usecase.ExecuteCommandLineInputUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -27,8 +27,8 @@ private const val COLOR_NON_ERROR = "#4BB543"
 class TerminalViewModelTests {
     val input = InputString.validateOrNull("get foo")!!
 
-    val executeCommandUseCase: ExecuteCommandUseCase = mock()
-    val tested = TerminalViewModel(executeCommandUseCase)
+    val executeCommandLineInputUseCase: ExecuteCommandLineInputUseCase = mock()
+    val tested = TerminalViewModel(executeCommandLineInputUseCase)
 
     val dispatcher = UnconfinedTestDispatcher()
 
@@ -60,7 +60,7 @@ class TerminalViewModelTests {
         tested.onInputSubmitted(input)
 
         // then
-        verify(executeCommandUseCase, never()).execute(input)
+        verify(executeCommandLineInputUseCase, never()).execute(input)
     }
 
     @Test
@@ -87,7 +87,7 @@ class TerminalViewModelTests {
         tested.onInputSubmitted(input)
 
         // then
-        verify(executeCommandUseCase).execute(input)
+        verify(executeCommandLineInputUseCase).execute(input)
     }
 
     @Test
@@ -106,7 +106,7 @@ class TerminalViewModelTests {
     fun `when onInputSubmitted executes command thatreturns response then add expected success response to history`() =
         runTest {
             // given
-            whenever(executeCommandUseCase.execute(input)).thenReturn("bar")
+            whenever(executeCommandLineInputUseCase.execute(input)).thenReturn("bar")
 
             // when
             tested.onInputSubmitted(input)
@@ -119,7 +119,9 @@ class TerminalViewModelTests {
     fun `when onInputSubmitted executes command that throws UnknownCommandException exception then add expected error response to history`() =
         runTest {
             // given
-            whenever(executeCommandUseCase.execute(input)).thenThrow(UnknownCommandException())
+            whenever(executeCommandLineInputUseCase.execute(input)).thenThrow(
+                UnknownCommandException()
+            )
 
             // when
             tested.onInputSubmitted(input)
@@ -132,7 +134,7 @@ class TerminalViewModelTests {
     fun `when onInputSubmitted executes command that throws NoTransactionException exception then add expected error response to history`() =
         runTest {
             // given
-            whenever(executeCommandUseCase.execute(input)).thenThrow(NoTransactionException())
+            whenever(executeCommandLineInputUseCase.execute(input)).thenThrow(NoTransactionException())
 
             // when
             tested.onInputSubmitted(input)
@@ -145,7 +147,7 @@ class TerminalViewModelTests {
     fun `when onInputSubmitted executes command that throws KeyNotSetException exception then add expected error response to history`() =
         runTest {
             // given
-            whenever(executeCommandUseCase.execute(input)).thenThrow(KeyNotSetException())
+            whenever(executeCommandLineInputUseCase.execute(input)).thenThrow(KeyNotSetException())
 
             // when
             tested.onInputSubmitted(input)

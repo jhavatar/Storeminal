@@ -1,4 +1,4 @@
-package io.chthonic.storeminal.domain
+package io.chthonic.storeminal.domain.usecase
 
 import io.chthonic.storeminal.domain.error.UnknownCommandException
 import io.chthonic.storeminal.domain.model.Command.*
@@ -8,7 +8,7 @@ import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Test
 
-class ParseCommandUseCaseTests {
+internal class ParseCommandUseCaseTests {
     val tested = ParseCommandUseCase()
 
     @Test(expected = UnknownCommandException::class)

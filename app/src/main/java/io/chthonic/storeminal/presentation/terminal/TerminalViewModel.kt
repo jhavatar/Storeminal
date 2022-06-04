@@ -5,11 +5,11 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.chthonic.storeminal.domain.ExecuteCommandUseCase
 import io.chthonic.storeminal.domain.api.NoTransactionException
 import io.chthonic.storeminal.domain.error.KeyNotSetException
 import io.chthonic.storeminal.domain.error.UnknownCommandException
 import io.chthonic.storeminal.domain.model.InputString
+import io.chthonic.storeminal.domain.usecase.ExecuteCommandLineInputUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +25,7 @@ private const val COLOR_NON_ERROR = "#4BB543"
 
 @HiltViewModel
 class TerminalViewModel @Inject constructor(
-    private val executeCommandUseCase: ExecuteCommandUseCase
+    private val executeCommandLineInputUseCase: ExecuteCommandLineInputUseCase
 ) : ViewModel() {
     private val history: MutableList<HistoryItem> = mutableListOf()
 
@@ -45,17 +45,17 @@ class TerminalViewModel @Inject constructor(
         _clearInput.value = true
         _inputSubmitEnabled.value = false
         updateHistory(HistoryItem.InputHistory(input.text))
-        executeCommand(input)
+        executeCommandLineInput(input)
     }
 
     fun onInputCleared() {
         _clearInput.value = false
     }
 
-    private fun executeCommand(input: InputString) {
+    private fun executeCommandLineInput(input: InputString) {
         viewModelScope.launch {
             try {
-                executeCommandUseCase.execute(input)?.let {
+                executeCommandLineInputUseCase.execute(input)?.let {
                     updateHistory(HistoryItem.OutputHistory(it, isError = false))
                 }
             } catch (e: UnknownCommandException) {

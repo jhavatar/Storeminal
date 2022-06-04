@@ -1,10 +1,11 @@
-package io.chthonic.storeminal.domain
+package io.chthonic.storeminal.domain.usecase
 
 import io.chthonic.storeminal.domain.api.KeyValueStore
 import io.chthonic.storeminal.domain.api.NoTransactionException
 import io.chthonic.storeminal.domain.error.KeyNotSetException
 import io.chthonic.storeminal.domain.error.UnknownCommandException
-import io.chthonic.storeminal.domain.model.Command
+import io.chthonic.storeminal.domain.model.Command.*
+import io.chthonic.storeminal.domain.model.Command.Set
 import io.chthonic.storeminal.domain.model.InputString
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -14,7 +15,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-class ExecuteCommandUseCaseTests {
+internal class ExecuteCommandLineInputUseCaseImplTests {
     val getInput = InputString.validateOrNull("get foo")!!
     val setInput = InputString.validateOrNull("set foo bar")!!
     val deleteInput = InputString.validateOrNull("delete foo")!!
@@ -23,13 +24,13 @@ class ExecuteCommandUseCaseTests {
     val commitInput = InputString.validateOrNull("commit")!!
     val rollbackInput = InputString.validateOrNull("rollback")!!
 
-    val getCommand = Command.Get("foo")
-    val setCommand = Command.Set("foo", "bar")
-    val deleteCommand = Command.Delete("foo")
-    val countCommand = Command.Count("foo")
-    val beginCommand = Command.Begin
-    val commitCommand = Command.Commit
-    val rollbackCommand = Command.Rollback
+    val getCommand = Get("foo")
+    val setCommand = Set("foo", "bar")
+    val deleteCommand = Delete("foo")
+    val countCommand = Count("foo")
+    val beginCommand = Begin
+    val commitCommand = Commit
+    val rollbackCommand = Rollback
 
     val store: KeyValueStore = mock() {
         on { runBlocking { get("foo") } } doReturn "bar"
@@ -45,7 +46,7 @@ class ExecuteCommandUseCaseTests {
         on { execute(commitInput) } doReturn commitCommand
         on { execute(rollbackInput) } doReturn rollbackCommand
     }
-    val tested = ExecuteCommandUseCase(parseCommandUseCase, store)
+    val tested = ExecuteCommandLineInputUseCaseImpl(parseCommandUseCase, store)
 
     @Test
     fun `given valid Get input when execute then execute expected get on store`() = runTest {

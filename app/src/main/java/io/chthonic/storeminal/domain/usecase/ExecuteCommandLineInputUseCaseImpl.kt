@@ -1,4 +1,4 @@
-package io.chthonic.storeminal.domain
+package io.chthonic.storeminal.domain.usecase
 
 import io.chthonic.storeminal.domain.api.KeyValueStore
 import io.chthonic.storeminal.domain.error.KeyNotSetException
@@ -6,14 +6,13 @@ import io.chthonic.storeminal.domain.model.Command
 import io.chthonic.storeminal.domain.model.InputString
 import javax.inject.Inject
 
-class ExecuteCommandUseCase @Inject constructor(
+internal class ExecuteCommandLineInputUseCaseImpl @Inject constructor(
     private val parseCommandUseCase: ParseCommandUseCase,
     private val store: KeyValueStore
-) {
-    suspend fun execute(input: InputString): String? {
-//        Log.v("d3V", "execute input = $input")
+) : ExecuteCommandLineInputUseCase {
+
+    override suspend fun execute(input: InputString): String? {
         val command = parseCommandUseCase.execute(input)
-//        Log.v("d3V", "execute command = $command")
         return executeCommand(command)
     }
 
