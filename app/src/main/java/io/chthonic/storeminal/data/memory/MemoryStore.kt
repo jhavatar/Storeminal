@@ -46,9 +46,7 @@ internal class MemoryStore(initialState: ArrayDeque<ConcurrentHashMap<String, St
             transMutex.withLock {
                 val oldTrans = removeActiveTransLockFree() ?: throw NoTransactionException()
                 val trans = getActiveTransLockFree()
-                oldTrans.forEach {
-                    trans[it.key] = it.value
-                }
+                trans.putAll(oldTrans)
             }
         }
     }
