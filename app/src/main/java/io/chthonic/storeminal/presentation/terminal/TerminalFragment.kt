@@ -63,7 +63,11 @@ class TerminalFragment : Fragment() {
         lifecycleScope.launchWhenStarted {
             viewModel.historyToDisplay.collect { history ->
                 binding.historyView.text = Html.fromHtml(history, Html.FROM_HTML_MODE_COMPACT)
-                binding.historyScrollView.fullScroll(View.FOCUS_DOWN)
+                binding.historyScrollView.apply {
+                    post {
+                        fullScroll(View.FOCUS_DOWN)
+                    }
+                }
             }
         }
 
