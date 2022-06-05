@@ -25,7 +25,7 @@ private const val COLOR_CHEVRON = "#FAFA91"
 private const val COLOR_ERROR = "#FFB0E5"
 private const val COLOR_NON_ERROR = "#9FFF99"
 
-class TerminalViewModelTests {
+internal class TerminalViewModelTests {
     val input = InputString.validateOrNull("get foo")!!
 
     val executeCommandLineInputUseCase: ExecuteCommandLineInputUseCase = mock()

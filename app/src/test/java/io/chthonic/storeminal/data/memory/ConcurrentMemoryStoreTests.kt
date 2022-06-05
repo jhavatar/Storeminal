@@ -7,9 +7,9 @@ import org.amshove.kluent.shouldBeNull
 import org.junit.Test
 import java.util.concurrent.ConcurrentHashMap
 
-internal class MemoryStoreTests {
+internal class ConcurrentMemoryStoreTests {
 
-    val tested = MemoryStore()
+    val tested = ConcurrentMemoryStore()
 
     @Test
     fun `given key does not exist when get then return null`() = runTest {
@@ -22,7 +22,7 @@ internal class MemoryStoreTests {
         // given
         val map = ConcurrentHashMap<String, String>()
         map["foo"] = "bar"
-        val tested = MemoryStore(buildStack(map))
+        val tested = ConcurrentMemoryStore(buildStack(map))
 
         // when/then
         tested.get("foo").shouldBeEqualTo("bar")
@@ -42,7 +42,7 @@ internal class MemoryStoreTests {
         // given
         val map = ConcurrentHashMap<String, String>()
         map["foo"] = "bar"
-        val tested = MemoryStore(buildStack(map))
+        val tested = ConcurrentMemoryStore(buildStack(map))
 
         // when
         tested.set("foo", "ro")
@@ -62,7 +62,7 @@ internal class MemoryStoreTests {
         // given
         val map = ConcurrentHashMap<String, String>()
         map["foo"] = "bar"
-        val tested = MemoryStore(buildStack(map))
+        val tested = ConcurrentMemoryStore(buildStack(map))
 
         // when/then
         tested.delete("foo").shouldBeEqualTo("bar")
@@ -73,7 +73,7 @@ internal class MemoryStoreTests {
         // given
         val map = ConcurrentHashMap<String, String>()
         map["foo"] = "bar"
-        val tested = MemoryStore(buildStack(map))
+        val tested = ConcurrentMemoryStore(buildStack(map))
 
         // when/then
         tested.delete("foo")
@@ -93,7 +93,7 @@ internal class MemoryStoreTests {
             val map = ConcurrentHashMap<String, String>()
             map["foo"] = "bar"
             map["fus"] = "bar"
-            val tested = MemoryStore(buildStack(map))
+            val tested = ConcurrentMemoryStore(buildStack(map))
 
             // when/then
             tested.count("bar").shouldBeEqualTo(2)
@@ -114,7 +114,7 @@ internal class MemoryStoreTests {
             // given
             val map = ConcurrentHashMap<String, String>()
             map["foo"] = "bar"
-            val tested = MemoryStore(buildStack(map))
+            val tested = ConcurrentMemoryStore(buildStack(map))
 
             // when
             tested.beginTransaction()
@@ -146,7 +146,7 @@ internal class MemoryStoreTests {
             // given
             val map = ConcurrentHashMap<String, String>()
             map["foo"] = "bar"
-            val tested = MemoryStore(buildStack(map))
+            val tested = ConcurrentMemoryStore(buildStack(map))
             tested.beginTransaction()
             tested.set("foo", "ro")
 
@@ -180,7 +180,7 @@ internal class MemoryStoreTests {
             // given
             val map = ConcurrentHashMap<String, String>()
             map["foo"] = "bar"
-            val tested = MemoryStore(buildStack(map))
+            val tested = ConcurrentMemoryStore(buildStack(map))
             tested.beginTransaction()
             tested.set("foo", "ro")
 

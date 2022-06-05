@@ -4,7 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.chthonic.storeminal.data.memory.MemoryStore
+import io.chthonic.storeminal.data.memory.ConcurrentMemoryStore
 import io.chthonic.storeminal.domain.api.KeyValueStore
 import javax.inject.Singleton
 
@@ -14,5 +14,5 @@ class DataSingletonModule {
     @Provides
     @Singleton
     fun provideKeyValueStore(): KeyValueStore =
-        MemoryStore()
+        ConcurrentMemoryStore()
 }

@@ -25,7 +25,7 @@ private const val COLOR_ERROR = "#FFB0E5"
 private const val COLOR_NON_ERROR = "#9FFF99"
 
 @HiltViewModel
-class TerminalViewModel @Inject constructor(
+internal class TerminalViewModel @Inject constructor(
     private val executeCommandLineInputUseCase: ExecuteCommandLineInputUseCase
 ) : ViewModel() {
     private val history: MutableList<HistoryItem> = mutableListOf()
