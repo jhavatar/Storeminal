@@ -32,7 +32,7 @@ internal class ExecuteCommandLineInputUseCaseImplTests {
     val commitCommand = Commit
     val rollbackCommand = Rollback
 
-    val store: KeyValueStore = mock() {
+    val store: KeyValueStore = mock {
         on { runBlocking { get("foo") } } doReturn "bar"
         on { runBlocking { delete("foo") } } doReturn "bar"
         on { runBlocking { count("foo") } } doReturn 1
