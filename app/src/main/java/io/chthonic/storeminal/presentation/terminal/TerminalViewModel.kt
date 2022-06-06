@@ -66,7 +66,7 @@ internal class TerminalViewModel @Inject constructor(
             } catch (e: KeyNotSetException) {
                 updateHistory(HistoryItem.OutputHistory(KEY_NOT_SET))
             } catch (e: Exception) {
-                Log.e("D3V", "executeCommandUseCase failed", e)
+                Log.e("TerminalViewModel", "executeCommandUseCase failed", e)
             }
             _inputSubmitEnabled.value = true
         }
