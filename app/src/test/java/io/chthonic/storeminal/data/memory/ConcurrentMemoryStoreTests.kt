@@ -7,6 +7,7 @@ import org.amshove.kluent.shouldBeNull
 import org.junit.Test
 import java.util.concurrent.ConcurrentHashMap
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 internal class ConcurrentMemoryStoreTests {
 
     val tested = ConcurrentMemoryStore()
@@ -192,11 +193,12 @@ internal class ConcurrentMemoryStoreTests {
         }
 
     private fun buildStack(
-        vararg maps: ConcurrentHashMap<String, String>
-    ): ArrayDeque<ConcurrentHashMap<String, String>> =
-        ArrayDeque<ConcurrentHashMap<String, String>>(maps.size).apply {
-            maps.forEach {
-                addLast(it)
+        vararg maps: MutableMap<String, String>
+    ): ArrayDeque<ConcurrentMemoryStore.Transaction> =
+        ArrayDeque<ConcurrentMemoryStore.Transaction>(maps.size).apply {
+            maps.forEach { map ->
+                val trans = ConcurrentMemoryStore.Transaction(map = map, valueCounters = map.generateValueCounters())
+                addLast(trans)
             }
         }
 }

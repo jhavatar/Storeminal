@@ -15,6 +15,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 internal class ExecuteCommandLineInputUseCaseImplTests {
     val getInput = InputString.validateOrNull("get foo")!!
     val setInput = InputString.validateOrNull("set foo bar")!!
