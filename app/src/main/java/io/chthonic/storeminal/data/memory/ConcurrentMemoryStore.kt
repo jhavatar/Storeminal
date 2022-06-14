@@ -3,9 +3,10 @@ package io.chthonic.storeminal.data.memory
 import io.chthonic.storeminal.domain.api.KeyValueStore
 import io.chthonic.storeminal.domain.api.NoTransactionException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 /**
  * Thread-safe in-memory implementation of [KeyValueStore].
@@ -14,17 +15,18 @@ import kotlinx.coroutines.withContext
 internal class ConcurrentMemoryStore(initialState: ArrayDeque<Transaction>? = null) :
     KeyValueStore {
 
-    private val transMutex = Mutex()
+    // Use semaphore with one permit as mutex since kotlin semaphore is fair and maintains a FIFO order of acquirers while kotlin mutex does not
+    private val transMutex = Semaphore(permits = 1)
     private val transStack =
         initialState ?: ArrayDeque<Transaction>(1).apply {
             this.addLast(Transaction())
         }
 
     override suspend fun get(key: String): String? =
-        transMutex.withLock { getActiveTrans().map[key] }
+        transMutex.withPermit { getActiveTrans().map[key] }
 
     override suspend fun set(key: String, value: String) {
-        transMutex.withLock {
+        transMutex.withPermit {
             setBatch(listOf(Pair(key, value)))
         }
     }
@@ -41,36 +43,39 @@ internal class ConcurrentMemoryStore(initialState: ArrayDeque<Transaction>? = nu
         }
     }
 
-    override suspend fun delete(key: String): String? = transMutex.withLock {
+    override suspend fun delete(key: String): String? = transMutex.withPermit {
         val activeTrans = getActiveTrans()
         activeTrans.map.remove(key)?.also { oldVal ->
             activeTrans.valueCounters[oldVal]?.dec()
         }
     }
 
-    override suspend fun count(value: String): Int = transMutex.withLock {
+    override suspend fun count(value: String): Int = transMutex.withPermit {
         getActiveTrans().valueCounters[value]?.count ?: 0
     }
 
     override suspend fun beginTransaction() {
-        transMutex.withLock {
+        transMutex.withPermit {
             transStack.addLast(Transaction())
         }
     }
 
     override suspend fun commitTransaction() {
-        withContext(Dispatchers.Default) {
-            transMutex.withLock {
-                val oldTrans = removeActiveTrans() ?: throw NoTransactionException()
-                setBatch(oldTrans.map.entries.map {
-                    Pair(it.key, it.value)
-                })
+        transMutex.withPermit {
+            coroutineScope {
+                // launch on background thread to not potentially block caller's thread since commit might take a while since the duration depends on the number of items in the transaction.
+                launch(Dispatchers.Default) {
+                    val oldTrans = removeActiveTrans() ?: throw NoTransactionException()
+                    setBatch(oldTrans.map.entries.map {
+                        Pair(it.key, it.value)
+                    })
+                }.join()
             }
         }
     }
 
     override suspend fun rollbackTransaction() {
-        transMutex.withLock {
+        transMutex.withPermit {
             removeActiveTrans() ?: throw NoTransactionException()
         }
     }
@@ -83,7 +88,7 @@ internal class ConcurrentMemoryStore(initialState: ArrayDeque<Transaction>? = nu
             transStack.removeLast()
         } else null
 
-    fun MutableMap<String, Counter>.getNewlyCreatedAndAddedCounter(value: String): Counter =
+    private fun MutableMap<String, Counter>.getNewlyCreatedAndAddedCounter(value: String): Counter =
         Counter().also { counter ->
             this[value] = counter
         }

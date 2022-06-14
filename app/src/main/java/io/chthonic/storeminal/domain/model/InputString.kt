@@ -3,7 +3,8 @@ package io.chthonic.storeminal.domain.model
 /**
  * InputString is validated to not contain a blank string and be trimmed.
  */
-data class InputString private constructor(val text: String) {
+@JvmInline
+value class InputString private constructor(val text: String) {
 
     companion object {
         fun validateOrNull(text: CharSequence?): InputString? =
