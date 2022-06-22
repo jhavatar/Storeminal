@@ -1,5 +1,8 @@
-package io.chthonic.storeminal.data.memory
+package io.chthonic.storeminal.data.store.concurrent
 
+import io.chthonic.storeminal.data.store.memory.MemoryStore
+import io.chthonic.storeminal.data.store.memory.generateValueCounters
+import io.chthonic.storeminal.domain.api.ConcurrentKeyValueStore
 import io.chthonic.storeminal.domain.api.NoTransactionException
 import kotlinx.coroutines.test.runTest
 import org.amshove.kluent.shouldBeEqualTo
@@ -8,14 +11,18 @@ import org.junit.Test
 import java.util.concurrent.ConcurrentHashMap
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-internal class ConcurrentMemoryStoreTests {
+internal abstract class ConcurrentStoreIntegrationTestsTemplate {
 
-    val tested = ConcurrentMemoryStore()
+    private val defaultTested: ConcurrentKeyValueStore by lazy {
+        buildTested(MemoryStore())
+    }
+
+    abstract fun buildTested(coreStore: MemoryStore): ConcurrentKeyValueStore
 
     @Test
     fun `given key does not exist when get then return null`() = runTest {
         // given/when/then
-        tested.get("foo").shouldBeNull()
+        defaultTested.get("foo").shouldBeNull()
     }
 
     @Test
@@ -23,7 +30,7 @@ internal class ConcurrentMemoryStoreTests {
         // given
         val map = ConcurrentHashMap<String, String>()
         map["foo"] = "bar"
-        val tested = ConcurrentMemoryStore(buildStack(map))
+        val tested = buildTested(buildCoreStore(map))
 
         // when/then
         tested.get("foo").shouldBeEqualTo("bar")
@@ -32,10 +39,10 @@ internal class ConcurrentMemoryStoreTests {
     @Test
     fun `given key does not exist when set key to value then return said value`() = runTest {
         // when
-        tested.set("foo", "bar")
+        defaultTested.set("foo", "bar")
 
         // then
-        tested.get("foo").shouldBeEqualTo("bar")
+        defaultTested.get("foo").shouldBeEqualTo("bar")
     }
 
     @Test
@@ -43,7 +50,7 @@ internal class ConcurrentMemoryStoreTests {
         // given
         val map = ConcurrentHashMap<String, String>()
         map["foo"] = "bar"
-        val tested = ConcurrentMemoryStore(buildStack(map))
+        val tested = buildTested(buildCoreStore(map))
 
         // when
         tested.set("foo", "ro")
@@ -55,7 +62,7 @@ internal class ConcurrentMemoryStoreTests {
     @Test
     fun `given key does not exist when delete then return null`() = runTest {
         // given/when/then
-        tested.delete("foo").shouldBeNull()
+        defaultTested.delete("foo").shouldBeNull()
     }
 
     @Test
@@ -63,7 +70,7 @@ internal class ConcurrentMemoryStoreTests {
         // given
         val map = ConcurrentHashMap<String, String>()
         map["foo"] = "bar"
-        val tested = ConcurrentMemoryStore(buildStack(map))
+        val tested = buildTested(buildCoreStore(map))
 
         // when/then
         tested.delete("foo").shouldBeEqualTo("bar")
@@ -74,7 +81,7 @@ internal class ConcurrentMemoryStoreTests {
         // given
         val map = ConcurrentHashMap<String, String>()
         map["foo"] = "bar"
-        val tested = ConcurrentMemoryStore(buildStack(map))
+        val tested = buildTested(buildCoreStore(map))
 
         // when/then
         tested.delete("foo")
@@ -84,7 +91,7 @@ internal class ConcurrentMemoryStoreTests {
     @Test
     fun `given value does not exist when count value then return 0`() = runTest {
         // when/then
-        tested.count("bar").shouldBeEqualTo(0)
+        defaultTested.count("bar").shouldBeEqualTo(0)
     }
 
     @Test
@@ -94,7 +101,7 @@ internal class ConcurrentMemoryStoreTests {
             val map = ConcurrentHashMap<String, String>()
             map["foo"] = "bar"
             map["fus"] = "bar"
-            val tested = ConcurrentMemoryStore(buildStack(map))
+            val tested = buildTested(buildCoreStore(map))
 
             // when/then
             tested.count("bar").shouldBeEqualTo(2)
@@ -104,9 +111,9 @@ internal class ConcurrentMemoryStoreTests {
     fun `when beginTransaction is called multiple times then there is no exception thrown`() =
         runTest {
             // when/then
-            tested.beginTransaction()
-            tested.beginTransaction()
-            tested.beginTransaction()
+            defaultTested.beginTransaction()
+            defaultTested.beginTransaction()
+            defaultTested.beginTransaction()
         }
 
     @Test
@@ -115,7 +122,7 @@ internal class ConcurrentMemoryStoreTests {
             // given
             val map = ConcurrentHashMap<String, String>()
             map["foo"] = "bar"
-            val tested = ConcurrentMemoryStore(buildStack(map))
+            val tested = buildTested(buildCoreStore(map))
 
             // when
             tested.beginTransaction()
@@ -128,17 +135,17 @@ internal class ConcurrentMemoryStoreTests {
     fun `given no started transactions when commitTransaction then throw NoTransactionException`() =
         runTest {
             // when/then
-            tested.commitTransaction()
+            defaultTested.commitTransaction()
         }
 
     @Test(expected = Test.None::class)
     fun `given a started transactions when commitTransaction throw then no exception thrown`() =
         runTest {
             // given
-            tested.beginTransaction()
+            defaultTested.beginTransaction()
 
             // when/then
-            tested.commitTransaction()
+            defaultTested.commitTransaction()
         }
 
     @Test
@@ -147,7 +154,7 @@ internal class ConcurrentMemoryStoreTests {
             // given
             val map = ConcurrentHashMap<String, String>()
             map["foo"] = "bar"
-            val tested = ConcurrentMemoryStore(buildStack(map))
+            val tested = buildTested(buildCoreStore(map))
             tested.beginTransaction()
             tested.set("foo", "ro")
 
@@ -162,17 +169,17 @@ internal class ConcurrentMemoryStoreTests {
     fun `given no started transactions when rollbackTransaction then throw NoTransactionException`() =
         runTest {
             // when/then
-            tested.rollbackTransaction()
+            defaultTested.rollbackTransaction()
         }
 
     @Test(expected = Test.None::class)
     fun `given a started transactions when rollbackTransaction then throw no exceptions`() =
         runTest {
             // given
-            tested.beginTransaction()
+            defaultTested.beginTransaction()
 
             // when/then
-            tested.rollbackTransaction()
+            defaultTested.rollbackTransaction()
         }
 
     @Test
@@ -181,7 +188,7 @@ internal class ConcurrentMemoryStoreTests {
             // given
             val map = ConcurrentHashMap<String, String>()
             map["foo"] = "bar"
-            val tested = ConcurrentMemoryStore(buildStack(map))
+            val tested = buildTested(buildCoreStore(map))
             tested.beginTransaction()
             tested.set("foo", "ro")
 
@@ -194,11 +201,17 @@ internal class ConcurrentMemoryStoreTests {
 
     private fun buildStack(
         vararg maps: MutableMap<String, String>
-    ): ArrayDeque<ConcurrentMemoryStore.Transaction> =
-        ArrayDeque<ConcurrentMemoryStore.Transaction>(maps.size).apply {
+    ): ArrayDeque<MemoryStore.Transaction> =
+        ArrayDeque<MemoryStore.Transaction>(maps.size).apply {
             maps.forEach { map ->
-                val trans = ConcurrentMemoryStore.Transaction(map = map, valueCounters = map.generateValueCounters())
+                val trans = MemoryStore.Transaction(
+                    map = map,
+                    valueCounters = map.generateValueCounters()
+                )
                 addLast(trans)
             }
         }
+
+    private fun buildCoreStore(vararg maps: MutableMap<String, String>): MemoryStore =
+        MemoryStore(buildStack(*maps))
 }

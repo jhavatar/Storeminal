@@ -18,6 +18,14 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    flavorDimensions "concurrency_impl"
+    productFlavors {
+        Mutexed {
+        }
+        Sequentialized {
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false

@@ -1,6 +1,6 @@
 package io.chthonic.storeminal.domain.usecase
 
-import io.chthonic.storeminal.domain.api.KeyValueStore
+import io.chthonic.storeminal.domain.api.ConcurrentKeyValueStore
 import io.chthonic.storeminal.domain.api.NoTransactionException
 import io.chthonic.storeminal.domain.error.KeyNotSetException
 import io.chthonic.storeminal.domain.error.UnknownCommandException
@@ -33,7 +33,7 @@ internal class ExecuteCommandLineInputUseCaseImplTests {
     val commitCommand = Commit
     val rollbackCommand = Rollback
 
-    val store: KeyValueStore = mock {
+    val store: ConcurrentKeyValueStore = mock {
         on { runBlocking { get("foo") } } doReturn "bar"
         on { runBlocking { delete("foo") } } doReturn "bar"
         on { runBlocking { count("foo") } } doReturn 1
