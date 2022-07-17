@@ -5,14 +5,14 @@ import io.chthonic.storeminal.domain.error.KeyNotSetException
 import io.chthonic.storeminal.domain.error.UnknownCommandException
 import io.chthonic.storeminal.domain.model.InputString
 import io.chthonic.storeminal.domain.usecase.ExecuteCommandLineInputUseCase
+import io.chthonic.storeminal.presentation.terminal.TerminalViewModel.State
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.amshove.kluent.shouldBeEmpty
 import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldBeFalse
-import org.amshove.kluent.shouldBeTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -27,10 +27,18 @@ private const val COLOR_NON_ERROR = "#9FFF99"
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 internal class TerminalViewModelTests {
-    val input = InputString.validateOrNull("get foo")!!
+    val inputTextToDisplay = "get foo"
+    val inputString = InputString.validateOrNull("get foo")!!
+    val inputHistory = listOf(HistoryItem.InputHistory("get foo"))
 
     val executeCommandLineInputUseCase: ExecuteCommandLineInputUseCase = mock()
-    val tested = TerminalViewModel(executeCommandLineInputUseCase)
+
+    val tested = TerminalViewModel(
+        executeCommandLineInputUseCase,
+        State().copy(
+            inputTextToDisplay = inputTextToDisplay
+        )
+    )
 
     val dispatcher = UnconfinedTestDispatcher()
 
@@ -45,116 +53,142 @@ internal class TerminalViewModelTests {
     }
 
     @Test
-    fun `when initial viewModel state then inputSubmitEnabled is true, clearInput is false and history is empty `() =
+    fun `when get initial viewModel state then state is the default state`() =
         runTest {
             // when / then
-            tested.inputSubmitEnabled.value.shouldBeTrue()
-            tested.clearInput.value.shouldBeFalse()
-            tested.historyToDisplay.value.shouldBeEqualTo("")
+            TerminalViewModel(executeCommandLineInputUseCase).state.value.shouldBeEqualTo(State())
         }
 
     @Test
-    fun `given inputEnabled is false when onInputSubmitted then ignore input`() = runTest {
-        // given
-        tested._inputSubmitEnabled.value = false
-
-        // when
-        tested.onInputSubmitted(input)
-
-        // then
-        verify(executeCommandLineInputUseCase, never()).execute(input)
-    }
-
-    @Test
-    fun `when onInputSubmitted then update history with input`() = runTest {
-        // when
-        tested.onInputSubmitted(input)
-
-        // then
-        tested.historyToDisplay.value.shouldBeEqualTo("<font color='$COLOR_CHEVRON'>></font> get foo")
-    }
-
-    @Test
-    fun `when onInputSubmitted then clearInput set to true`() = runTest {
-        // when
-        tested.onInputSubmitted(input)
-
-        // then
-        tested.clearInput.value.shouldBeTrue()
-    }
-
-    @Test
-    fun `when onInputSubmitted then attempt to execute input as a command`() = runTest {
-        // when
-        tested.onInputSubmitted(input)
-
-        // then
-        verify(executeCommandLineInputUseCase).execute(input)
-    }
-
-    @Test
-    fun `when onInputCleared then reset clearInput to false`() = runTest {
-        // given
-        tested._clearInput.value = true
-
-        // when
-        tested.onInputCleared()
-
-        // then
-        tested._clearInput.value.shouldBeFalse()
-    }
-
-    @Test
-    fun `when onInputSubmitted executes command thatreturns response then add expected success response to history`() =
+    fun `given valid input text and inputEnabled is false when onInputSubmitted then ignore input and not execute input`() =
         runTest {
             // given
-            whenever(executeCommandLineInputUseCase.execute(input)).thenReturn("bar")
+            val tested = TerminalViewModel(
+                executeCommandLineInputUseCase, State().copy(
+                    inputTextToDisplay = inputTextToDisplay,
+                    inputSubmitEnabled = false
+                )
+            )
 
             // when
-            tested.onInputSubmitted(input)
+            tested.onInputSubmitted()
 
             // then
-            tested.historyToDisplay.value.endsWith("<font color=$COLOR_NON_ERROR>bar</font>")
+            verify(executeCommandLineInputUseCase, never()).execute(inputString)
         }
 
     @Test
-    fun `when onInputSubmitted executes command that throws UnknownCommandException exception then add expected error response to history`() =
+    fun `given invalid input and inputEnabled is true text when onInputSubmitted then ignore input and state not updated`() =
         runTest {
             // given
-            whenever(executeCommandLineInputUseCase.execute(input)).thenThrow(
+            val state = State().copy(
+                inputTextToDisplay = "",
+                inputSubmitEnabled = true,
+                history = inputHistory
+            )
+            val tested = TerminalViewModel(executeCommandLineInputUseCase, state)
+
+            // when
+            tested.onInputSubmitted()
+
+            // then
+            tested.state.value.shouldBeEqualTo(state)
+        }
+
+    @Test
+    fun `given valid input text when onInputSubmitted then add input to history`() = runTest {
+        // when
+        tested.onInputSubmitted()
+
+        // then
+        tested.state.value.history.toString().shouldBeEqualTo(inputHistory.toString())
+    }
+
+    @Test
+    fun `given valid input text when onInputSubmitted then update history with input`() = runTest {
+        // when
+        tested.onInputSubmitted()
+
+        // then
+        tested.state.value.historyToDisplay.shouldBeEqualTo("<font color='$COLOR_CHEVRON'>></font> get foo")
+    }
+
+    @Test
+    fun `given valid input when onInputSubmitted then text to display should be cleared`() =
+        runTest {
+            // when
+            tested.onInputSubmitted()
+
+            // then
+            tested.state.value.inputTextToDisplay.shouldBeEmpty()
+        }
+
+
+    @Test
+    fun `given valid input when onInputSubmitted then attempt to execute input as a command`() =
+        runTest {
+            // when
+            tested.onInputSubmitted()
+
+            // then
+            verify(executeCommandLineInputUseCase).execute(inputString)
+        }
+
+    @Test
+    fun `given valid input when onInputSubmitted executes command that returns response then add expected success response to history`() =
+        runTest {
+            // given
+            whenever(executeCommandLineInputUseCase.execute(inputString)).thenReturn("bar")
+
+            // when
+            tested.onInputSubmitted()
+
+            // then
+            tested.state.value.historyToDisplay.endsWith("<font color=$COLOR_NON_ERROR>bar</font>")
+        }
+
+    @Test
+    fun `given valid input when onInputSubmitted executes command that throws UnknownCommandException exception then add expected error response to history`() =
+        runTest {
+            // given
+            whenever(executeCommandLineInputUseCase.execute(inputString)).thenThrow(
                 UnknownCommandException()
             )
 
             // when
-            tested.onInputSubmitted(input)
+            tested.onInputSubmitted()
 
             // then
-            tested.historyToDisplay.value.endsWith("<font color=$COLOR_ERROR>unknown command</font>")
+            tested.state.value.historyToDisplay.endsWith("<font color=$COLOR_ERROR>unknown command</font>")
         }
 
     @Test
-    fun `when onInputSubmitted executes command that throws NoTransactionException exception then add expected error response to history`() =
+    fun `given valid input when onInputSubmitted executes command that throws NoTransactionException exception then add expected error response to history`() =
         runTest {
             // given
-            whenever(executeCommandLineInputUseCase.execute(input)).thenThrow(NoTransactionException())
+            whenever(executeCommandLineInputUseCase.execute(inputString)).thenThrow(
+                NoTransactionException()
+            )
 
             // when
-            tested.onInputSubmitted(input)
+            tested.onInputSubmitted()
 
             // then
-            tested.historyToDisplay.value.endsWith("<font color=$COLOR_ERROR>no transaction</font>")
+            tested.state.value.historyToDisplay.endsWith("<font color=$COLOR_ERROR>no transaction</font>")
         }
 
     @Test
-    fun `when onInputSubmitted executes command that throws KeyNotSetException exception then add expected error response to history`() =
+    fun `given valid input when onInputSubmitted executes command that throws KeyNotSetException exception then add expected error response to history`() =
         runTest {
             // given
-            whenever(executeCommandLineInputUseCase.execute(input)).thenThrow(KeyNotSetException())
+            whenever(executeCommandLineInputUseCase.execute(inputString)).thenThrow(
+                KeyNotSetException()
+            )
 
             // when
-            tested.onInputSubmitted(input)
+            tested.onInputSubmitted()
 
             // then
-            tested.historyToDisplay.value.endsWith("<font color=$COLOR_ERROR>key not set</font>")
+            tested.state.value.historyToDisplay.endsWith("<font color=$COLOR_ERROR>key not set</font>")
         }
 }
