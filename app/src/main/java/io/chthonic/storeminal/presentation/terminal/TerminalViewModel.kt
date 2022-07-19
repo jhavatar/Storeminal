@@ -1,7 +1,6 @@
 package io.chthonic.storeminal.presentation.terminal
 
 import android.util.Log
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,64 +24,80 @@ private const val COLOR_ERROR = "#FFB0E5"
 private const val COLOR_NON_ERROR = "#9FFF99"
 
 @HiltViewModel
-internal class TerminalViewModel @Inject constructor(
-    private val executeCommandLineInputUseCase: ExecuteCommandLineInputUseCase
+internal class TerminalViewModel constructor(
+    private val executeCommandLineInputUseCase: ExecuteCommandLineInputUseCase,
+    initStateState: State
 ) : ViewModel() {
-    private val history: MutableList<HistoryItem> = mutableListOf()
 
-    private val _historyToDisplay = MutableStateFlow("")
-    val historyToDisplay: StateFlow<String> = _historyToDisplay.asStateFlow()
+    @Inject
+    constructor(executeCommandLineInputUseCase: ExecuteCommandLineInputUseCase) : this(
+        executeCommandLineInputUseCase,
+        State()
+    )
 
-    @VisibleForTesting
-    val _clearInput = MutableStateFlow(false)
-    val clearInput: StateFlow<Boolean> = _clearInput.asStateFlow()
-
-    @VisibleForTesting
-    val _inputSubmitEnabled = MutableStateFlow(true)
-    val inputSubmitEnabled: StateFlow<Boolean> = _inputSubmitEnabled.asStateFlow()
-
-    fun onInputSubmitted(input: InputString) {
-        if (!inputSubmitEnabled.value) return
-        _clearInput.value = true
-        _inputSubmitEnabled.value = false
-        updateHistory(HistoryItem.InputHistory(input.text))
-        executeCommandLineInput(input)
+    data class State(
+        val inputTextToDisplay: String = "",
+        val inputSubmitEnabled: Boolean = true,
+        val history: List<HistoryItem> = emptyList()
+    ) {
+        val historyToDisplay: String by lazy {
+            history.joinToString(
+                separator = "<br>",
+            )
+        }
     }
 
-    fun onInputCleared() {
-        _clearInput.value = false
+    private val _state = MutableStateFlow(initStateState)
+    val state: StateFlow<State> = _state.asStateFlow()
+
+    fun onTextChanged(text: String) {
+        _state.value = state.value.copy(inputTextToDisplay = text)
+    }
+
+    fun onInputSubmitted() {
+        val currentSate = state.value
+        if (!currentSate.inputSubmitEnabled) return
+        InputString.validateOrNull(currentSate.inputTextToDisplay)?.let { input ->
+            _state.value = currentSate.copy(
+                inputTextToDisplay = "",
+                inputSubmitEnabled = false,
+                history = currentSate.history.append(HistoryItem.InputHistory(input.text))
+            )
+            executeCommandLineInput(input)
+        }
     }
 
     private fun executeCommandLineInput(input: InputString) {
         viewModelScope.launch {
-            try {
+            val history = state.value.history
+            val updatedHistory = try {
                 executeCommandLineInputUseCase.execute(input)?.let {
-                    updateHistory(HistoryItem.OutputHistory(it, isError = false))
+                    history.append(HistoryItem.OutputHistory(it, isError = false))
                 }
             } catch (e: UnknownCommandException) {
-                updateHistory(HistoryItem.OutputHistory(UNKNOWN_COMMAND))
+                history.append(HistoryItem.OutputHistory(UNKNOWN_COMMAND))
             } catch (e: NoTransactionException) {
-                updateHistory(HistoryItem.OutputHistory(NO_TRANS))
+                history.append(HistoryItem.OutputHistory(NO_TRANS))
             } catch (e: KeyNotSetException) {
-                updateHistory(HistoryItem.OutputHistory(KEY_NOT_SET))
+                history.append(HistoryItem.OutputHistory(KEY_NOT_SET))
             } catch (e: Exception) {
                 Log.e("TerminalViewModel", "executeCommandUseCase failed", e)
+                null
             }
-            _inputSubmitEnabled.value = true
+            _state.value = state.value.copy(
+                inputSubmitEnabled = true,
+                history = updatedHistory ?: history
+            )
         }
     }
 
-    private fun updateHistory(historyItem: HistoryItem) {
-        history.add(historyItem)
-        _historyToDisplay.value =
-            history.joinToString(separator = "<br>", transform = ::historyTransform)
-    }
-
-    private fun historyTransform(historyItem: HistoryItem): CharSequence =
-        historyItem.toString()
+    private fun List<HistoryItem>.append(historyItem: HistoryItem): List<HistoryItem> =
+        this.toMutableList().apply {
+            add(historyItem)
+        }.toList()
 }
 
-private sealed class HistoryItem(val text: String) {
+sealed class HistoryItem(val text: String) {
     class InputHistory(text: String) : HistoryItem(text) {
         override fun toString(): String = "<font color='$COLOR_CHEVRON'>></font> $text"
     }

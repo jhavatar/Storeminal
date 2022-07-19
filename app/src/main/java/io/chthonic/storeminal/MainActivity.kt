@@ -1,20 +1,30 @@
 package io.chthonic.storeminal
 
+import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import dagger.hilt.android.AndroidEntryPoint
-import io.chthonic.storeminal.presentation.terminal.TerminalFragment
+import io.chthonic.rickmortychars.presentation.theme.AppTheme
+import io.chthonic.storeminal.presentation.AppContainer
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.main_activity)
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.container, TerminalFragment.newInstance())
-                .commitNow()
+        setContent {
+            AppTheme(isDarkTheme = isNightMode()) {
+                AppContainer()
+            }
         }
     }
+
+    private fun isNightMode(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            resources.configuration.isNightModeActive
+        } else {
+            resources.configuration.uiMode == Configuration.UI_MODE_NIGHT_YES
+        }
 }

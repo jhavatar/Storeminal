@@ -1,22 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="grey">#96949B</color>
-
-    <!--<dracula>-->
-    <color name="dracula_bg">#22212C</color>
-    <color name="dracula_primary">#7A71AB</color>
-    <color name="dracula_primary_darker">#45405A</color>
     <color name="dracula_primary_darkest">#2B2640</color>
-    <color name="dracula_color_on_primary">@color/white</color>
-
-    <color name="dracula_secondary">#FCFC98</color>
-    <color name="dracula_secondary_variant">#FA84C6</color>
-    <color name="dracula_secondary_variant2">#9FFF99</color>
-    <color name="dracula_color_on_secondary">@color/dracula_bg</color>
-    <!--</dracula>-->
-
-    <color name="terminal_bg">@color/dracula_bg</color>
-    <color name="terminal_bottom_bar">@color/dracula_primary_darker</color>
 </resources>
