@@ -1,11 +1,10 @@
-package io.chthonic.rickmortychars.presentation.theme
+package io.chthonic.storeminal.presentation.theme
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import io.chthonic.storeminal.presentation.theme.*
 
 private val DarkColors = darkColors(
     surface = DraculaDarkestPurple, // top app bar

@@ -8,7 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import io.chthonic.rickmortychars.presentation.ktx.collectAsStateLifecycleAware
+import io.chthonic.storeminal.presentation.ktx.collectAsStateLifecycleAware
 import io.chthonic.storeminal.R
 
 @Preview

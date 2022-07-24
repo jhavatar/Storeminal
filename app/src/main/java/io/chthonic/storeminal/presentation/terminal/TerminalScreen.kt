@@ -35,8 +35,8 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.core.text.HtmlCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
-import io.chthonic.rickmortychars.presentation.ktx.collectAsStateLifecycleAware
-import io.chthonic.rickmortychars.presentation.theme.AppTheme
+import io.chthonic.storeminal.presentation.ktx.collectAsStateLifecycleAware
+import io.chthonic.storeminal.presentation.theme.AppTheme
 import io.chthonic.storeminal.R
 import io.chthonic.storeminal.presentation.theme.DraculaBlack
 import io.chthonic.storeminal.presentation.theme.DraculaDarkerPurple

@@ -1,6 +1,5 @@
 package io.chthonic.storeminal.presentation.theme
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 val DarkGray = Color(0xFF464646)

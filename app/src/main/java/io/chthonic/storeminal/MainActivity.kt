@@ -6,7 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import dagger.hilt.android.AndroidEntryPoint
-import io.chthonic.rickmortychars.presentation.theme.AppTheme
+import io.chthonic.storeminal.presentation.theme.AppTheme
 import io.chthonic.storeminal.presentation.AppContainer
 
 @AndroidEntryPoint

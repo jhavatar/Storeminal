@@ -1,4 +1,4 @@
-package io.chthonic.rickmortychars.presentation.ktx
+package io.chthonic.storeminal.presentation.ktx
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
